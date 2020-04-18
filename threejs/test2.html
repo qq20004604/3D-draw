@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="./three.js"></script>
+    <script src="./draco_decoder.js"></script>
+    <script src="./stats.min.js"></script>
+    <script src="./OrbitControls.js"></script>
+</head>
+<body>
+<script>
+    class ThreeDManager {
+        // 创造场景
+        createScene() {
+            // 尺寸
+            this.size = {
+                width: window.innerWidth,
+                height: window.innerHeight
+            }
+            this.MAX_NUMBER = 100;
+            this.scene = new THREE.Scene();      //创建场景
+            this.scene.background = new THREE.Color('#fff');
+        }
+
+        // 创造相机
+        createCamera() {
+            const MAX_NUMBER = this.MAX_NUMBER;
+            this.camera = new THREE.OrthographicCamera(MAX_NUMBER / -1, MAX_NUMBER / 0.8,
+                MAX_NUMBER / 0.8, MAX_NUMBER / -0.8, MAX_NUMBER / 1, 10000);
+            this.camera.position.set(500, 500, 800);//设置相机坐标
+            this.camera.lookAt({x: 0, y: 0, z: 0});//让相机指向场景中心
+        }
+
+        // 创建渲染器（容器），并添加到 body 里
+        createRender() {
+            //创建渲染器（并设置抗锯齿属性）
+            this.renderer = new THREE.WebGLRenderer({antialias: true});
+            //设置渲染器的大小
+            this.renderer.setSize(this.size.width, this.size.height);
+            //添加渲染器的DOM元素到body中
+            document.body.appendChild(this.renderer.domElement);
+        }
+
+        // 创建控制器
+        createController() {
+            const controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+            controls.screenSpacePanning = true;
+        }
+
+        // 自动渲染动画，每帧更新一次
+        animate(time) {
+            requestAnimationFrame(this.animate.bind(this));
+            // 渲染动画
+            this.renderer.render(this.scene, this.camera);
+        }
+
+        // 创建 x、y、z 坐标轴
+        createGeometry() {
+            const MAX_NUMBER = this.MAX_NUMBER;
+            // 渲染 x/y 轴面
+            // 创建geometry
+            const geometryXY1 = new THREE.Geometry();
+            // 添加顶点
+            geometryXY1.vertices.push(new THREE.Vector3(0, 0, 0));
+            geometryXY1.vertices.push(new THREE.Vector3(MAX_NUMBER, 0, 0));
+
+            const geometryXY2 = new THREE.Geometry();
+            geometryXY2.vertices.push(new THREE.Vector3(0, 0, 0));
+            geometryXY2.vertices.push(new THREE.Vector3(MAX_NUMBER, 0, 0));
+
+            for (let i = 0; i <= 10; i++) {
+                const line1 = new THREE.Line(geometryXY1, new THREE.LineBasicMaterial({color: i === 0 ? '#000' : "#ccc"}));     //利用geometry和material创建line
+                line1.position.z = i * MAX_NUMBER / 10;   //设置line的位置
+                this.scene.add(line1);    //将line添加到场景中
+
+                const line11 = new THREE.Line(geometryXY2, new THREE.LineBasicMaterial({color: i === 0 ? '#000' : "#ccc"}));
+                line11.position.x = i * MAX_NUMBER / 10;
+                line11.rotation.y = -Math.PI / 2;    //绕y轴旋转90度
+                this.scene.add(line11);
+            }
+
+            // 渲染 Y/Z 面
+            const geometryYZ1 = new THREE.Geometry();    //创建geometry
+            geometryYZ1.vertices.push(new THREE.Vector3(0, 0, 0));  //添加顶点
+            geometryYZ1.vertices.push(new THREE.Vector3(0, 0, MAX_NUMBER));
+            const geometryYZ2 = new THREE.Geometry();    //创建geometry
+            geometryYZ2.vertices.push(new THREE.Vector3(0, 0, 0));  //添加顶点
+            geometryYZ2.vertices.push(new THREE.Vector3(0, 0, MAX_NUMBER));
+            for (let i = 0; i <= 10; i++) {
+                //var mesh = new THREE.Mesh(geometry, material);
+                const line2 = new THREE.Line(geometryYZ1, new THREE.LineBasicMaterial({color: i === 0 ? '#000' : "#ccc"}));     //利用geometry和material创建line
+                line2.position.y = i * MAX_NUMBER / 10;   //设置line的位置
+                this.scene.add(line2);    //将line添加到场景中
+
+                const line22 = new THREE.Line(geometryYZ2, new THREE.LineBasicMaterial({color: i === 0 ? '#000' : "#ccc"}));
+                line22.position.z = i * MAX_NUMBER / 10;
+                line22.rotation.x = -Math.PI / 2;    //绕y轴旋转90度
+                this.scene.add(line22);
+            }
+
+            // 渲染 X/Z 面
+            const geometryXZ1 = new THREE.Geometry();    //创建geometry
+            geometryXZ1.vertices.push(new THREE.Vector3(0, 0, 0));  //添加顶点
+            geometryXZ1.vertices.push(new THREE.Vector3(MAX_NUMBER, 0, 0));
+            const geometryXZ2 = new THREE.Geometry();    //创建geometry
+            geometryXZ2.vertices.push(new THREE.Vector3(0, 0, 0));  //添加顶点
+            geometryXZ2.vertices.push(new THREE.Vector3(MAX_NUMBER, 0, 0));
+            for (let i = 0; i <= 10; i++) {
+                //var mesh = new THREE.Mesh(geometry, material);
+                const line3 = new THREE.Line(geometryXZ1, new THREE.LineBasicMaterial({color: i === 0 ? '#000' : "#ccc"}));     //利用geometry和material创建line
+                line3.position.y = i * MAX_NUMBER / 10;   //设置line的位置
+                this.scene.add(line3);    //将line添加到场景中
+
+                const line33 = new THREE.Line(geometryXZ2, new THREE.LineBasicMaterial({color: i === 0 ? '#000' : "#ccc"}));
+                line33.position.x = i * MAX_NUMBER / 10;
+                line33.rotation.z = Math.PI / 2;    //绕y轴旋转90度
+                this.scene.add(line33);
+            }
+        }
+
+        // 绘制 x、y、z 坐标轴的文字
+        createXYZText() {
+            const MAX_NUMBER = this.MAX_NUMBER;
+
+            const textLoader = new THREE.FontLoader();
+            const that = this;
+            textLoader.load(
+                './fonts/helvetiker_regular.typeface.json',
+                function (font) {
+                    // left top text
+                    const options = {
+                        size: MAX_NUMBER * 0.03,
+                        height: 0,  // 厚度
+                        font, // “引用js字体必须换成英文”
+                        bevelThickness: 1,  // 文字斜角的深度。默认值是10。
+                        bevelSize: 90,   // 距文字轮廓有多远是斜角。默认值为8。
+                        // bevelSegments: 1,   // 斜角段的数量。默认值为3。
+                        // curveSegments: 50,  // 曲线上的点数。默认值为12。
+                        // bevelEnabled: true,  // 布尔值。打开斜角。默认值为False。
+                    }
+
+                    // 第一个是坐标位置，第二是每个坐标轴写多少+1个文字，比如 10，间隔 10，数字是从 0 ~ 100
+                    function createText(positions, n = 10, direction) {
+                        for (let i = 0; i < n + 1; i++) {
+                            const text = positions.text ? JSON.stringify(positions.text(i)) : JSON.stringify(i * positions.n);
+                            // 使用 TextBufferGeometry 比 TextGeometry快
+                            const textLeftTop = new THREE.TextBufferGeometry(text, options);
+                            const textMeshLeftTop = new THREE.Mesh(textLeftTop, new THREE.MeshBasicMaterial({
+                                color: '#333'
+                            }));
+                            let x = typeof positions.x === 'function' ? positions.x(i) : positions.x;
+                            // textMeshLeftTop.position.x = x;
+                            let y = typeof positions.y === 'function' ? positions.y(i) : positions.y;
+                            // textMeshLeftTop.position.y = y;
+                            let z = typeof positions.z === 'function' ? positions.z(i) : positions.z;
+                            // textMeshLeftTop.position.z = z;
+                            // textGroup.push(textMeshLeftTop);
+                            const group = new THREE.Group();//创建一个组，测试如果不加入组无法如以中心旋转而是从min位置旋转
+                            // 设置 group 的基准坐标（即group的0,0,0的坐标，是整个世界坐标轴的哪里）
+                            group.position.x = x;
+                            group.position.y = y;
+                            group.position.z = z;
+                            group.add(textMeshLeftTop);
+
+                            // 旋转坐标轴文字
+                            if ((direction === 'yz-z' && z !== 0) || direction === 'yz-y') {
+                                // yx-y 时，不画 0，不然同一个位置有2个不同方向的0，很难看
+                                if (direction === 'yz-y' && y === 0) {
+                                    // console.log(x, y, z)
+                                    continue;
+                                }
+                                const q = new THREE.Vector3(0, 1, 0);
+                                group.rotateOnWorldAxis(q, Math.PI / 2);
+                                group.position.z += MAX_NUMBER / 20;
+                            }
+                            that.scene.add(group);
+                        }
+                    }
+
+                    // 画六个方向的坐标轴文字
+                    createText({
+                        n: MAX_NUMBER / 10,
+                        x: 0,
+                        y: MAX_NUMBER,
+                        z: function (i) {
+                            return MAX_NUMBER / 10 * i
+                        }
+                    }, undefined, 'yz-z');  // xz 面和 z 轴平行的数字，下同
+                    createText({
+                        n: MAX_NUMBER / 10,
+                        x: function (i) {
+                            return i * MAX_NUMBER / 10
+                        },
+                        y: 0,
+                        z: MAX_NUMBER
+                    }, undefined, 'xz-x');
+                    // x、y 轴文字
+                    createText({
+                        n: MAX_NUMBER / 10,
+                        x: function (i) {
+                            return i * MAX_NUMBER / 10
+                        },
+                        y: MAX_NUMBER,
+                        z: 0
+                    }, undefined, 'xy-x');
+                    createText({
+                        n: MAX_NUMBER / 10,
+                        x: MAX_NUMBER,
+                        y: 0,
+                        z: function (i) {
+                            return i * MAX_NUMBER / 10
+                        }
+                    }, undefined, 'xz-z');
+                    createText({
+                        n: MAX_NUMBER / 10,
+                        x: MAX_NUMBER,
+                        y: function (i) {
+                            return i * MAX_NUMBER / 10
+                        },
+                        z: 0
+                    }, undefined, 'xy-y');
+                    createText({
+                        n: MAX_NUMBER / 10,
+                        x: 0,
+                        z: MAX_NUMBER,
+                        y: function (i) {
+                            return i * MAX_NUMBER / 10
+                        }
+                    }, undefined, 'yz-y');
+                }
+            );
+        }
+    }
+
+    const tdm = new ThreeDManager();
+    tdm.createScene();
+    tdm.createCamera();
+    tdm.createRender();
+    tdm.createController();
+    tdm.animate();
+    tdm.createGeometry();
+    tdm.createXYZText();
+
+</script>
+</body>
+</html>
