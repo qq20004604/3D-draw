@@ -21,18 +21,37 @@
                 width: window.innerWidth,
                 height: window.innerHeight
             }
-            this.MAX_NUMBER = 100;
+            this.MAX_NUMBER = 1;
             this.scene = new THREE.Scene();      //创建场景
             this.scene.background = new THREE.Color('#fff');
         }
 
-        // 创造相机
+        // 创造相机0
         createCamera() {
             const MAX_NUMBER = this.MAX_NUMBER;
-            this.camera = new THREE.OrthographicCamera(MAX_NUMBER / -1, MAX_NUMBER / 0.8,
-                MAX_NUMBER / 0.8, MAX_NUMBER / -0.8, MAX_NUMBER / 1, 10000);
-            this.camera.position.set(500, 500, 800);//设置相机坐标
-            this.camera.lookAt({x: 0, y: 0, z: 0});//让相机指向场景中心
+            const proportion = this.size.width / this.size.height;
+            let w = null;
+            let h = null;
+            // 这里要算出立方体相机的尺寸
+            if (proportion > 1) {
+                // 说明宽度大于高度
+                w = MAX_NUMBER * proportion;
+                h = MAX_NUMBER;
+            } else {
+                w = MAX_NUMBER;
+                h = MAX_NUMBER * proportion;
+            }
+            // 这个是可视区域，是一个立方体，需要定义六个面的位置
+            this.camera = new THREE.OrthographicCamera(
+                // 左平面的位置，右平面的位置
+                w * -1, w * 1,
+                // 上平面的位置，下平面的位置
+                h * 1, h * -1,
+                // 前平面的位置，后平面的位置
+                h * -1, MAX_NUMBER * 3);
+            this.camera.position.set(MAX_NUMBER, MAX_NUMBER * 0.8, MAX_NUMBER);//设置相机坐标
+            // this.camera.position.set(500, 500, 800);//设置相机坐标
+            // this.camera.lookAt({x: 0, y: 0, z: 0});//让相机指向场景中心
         }
 
         // 创建渲染器（容器），并添加到 body 里
@@ -61,7 +80,7 @@
         // 创建 x、y、z 坐标轴
         createGeometry() {
             const MAX_NUMBER = this.MAX_NUMBER;
-            // 渲染 x/y 轴面
+            // 渲染 x/z 轴面
             // 创建geometry
             const geometryXY1 = new THREE.Geometry();
             // 添加顶点
@@ -74,7 +93,7 @@
 
             for (let i = 0; i <= 10; i++) {
                 const line1 = new THREE.Line(geometryXY1, new THREE.LineBasicMaterial({color: i === 0 ? '#000' : "#ccc"}));     //利用geometry和material创建line
-                line1.position.z = i * MAX_NUMBER / 10;   //设置line的位置
+                line1.position.z = i * MAX_NUMBER / 10;   //设置line的位置（即z轴的坐标）
                 this.scene.add(line1);    //将line添加到场景中
 
                 const line11 = new THREE.Line(geometryXY2, new THREE.LineBasicMaterial({color: i === 0 ? '#000' : "#ccc"}));
@@ -110,7 +129,6 @@
             geometryXZ2.vertices.push(new THREE.Vector3(0, 0, 0));  //添加顶点
             geometryXZ2.vertices.push(new THREE.Vector3(MAX_NUMBER, 0, 0));
             for (let i = 0; i <= 10; i++) {
-                //var mesh = new THREE.Mesh(geometry, material);
                 const line3 = new THREE.Line(geometryXZ1, new THREE.LineBasicMaterial({color: i === 0 ? '#000' : "#ccc"}));     //利用geometry和material创建line
                 line3.position.y = i * MAX_NUMBER / 10;   //设置line的位置
                 this.scene.add(line3);    //将line添加到场景中
@@ -146,7 +164,9 @@
                     // 第一个是坐标位置，第二是每个坐标轴写多少+1个文字，比如 10，间隔 10，数字是从 0 ~ 100
                     function createText(positions, n = 10, direction) {
                         for (let i = 0; i < n + 1; i++) {
-                            const text = positions.text ? JSON.stringify(positions.text(i)) : JSON.stringify(i * positions.n);
+                            let num = positions.text ? positions.text(i.toFixed(1)) : (i * positions.n).toFixed(1);
+                            num = Number(num);
+                            const text = JSON.stringify(num);
                             // 使用 TextBufferGeometry 比 TextGeometry快
                             const textLeftTop = new THREE.TextBufferGeometry(text, options);
                             const textMeshLeftTop = new THREE.Mesh(textLeftTop, new THREE.MeshBasicMaterial({
