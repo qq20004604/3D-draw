@@ -6,7 +6,7 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <script src="./three.js"></script>
+    <script src="./three.min.js"></script>
     <script src="./draco_decoder.js"></script>
     <script src="./stats.min.js"></script>
     <script src="./OrbitControls.js"></script>
@@ -27,8 +27,9 @@
     <button onclick="clearCanvas()">清空画布</button>
     <button onclick="drawAxis()">画坐标轴</button>
     <button onclick="drawPoints()">画坐标轴 + 画点（随机生成100个点）</button>
-    <button onclick="test()">画一个数学公式的面【z = (3 * x + 4 * x * y) / 30】</button>
+    <button onclick="drawFormula()">画一个数学公式的面【z = (3 * x + 4 * x * y) / 30】</button>
 </p>
+<p>Github地址：<a target="_blank" href="https://github.com/qq20004604/3D-draw">https://github.com/qq20004604/3D-draw</a></p>
 <script>
     // 生成三维随机数。参数1是最大值（0~最大值），参数2是生成数字的数量
     function make3DRandomNumberList(max, count, fixed = 2) {
@@ -69,11 +70,11 @@
         tdm.drawPoints('#f00', 3);
     }
 
-    function test() {
+    function drawFormula() {
         tdm._clearScene();
         tdm.setPointsMax(10);
         // 绘制一个正方形
-        tdm.drawFace4 = function (x, y, duration, fn) {
+        tdm.drawSurface = function (x, y, duration, fn) {
             const FaceColor = '#a00';
 
             let geometry = new THREE.Geometry(); // 声明一个空几何体对象
@@ -114,20 +115,12 @@
             this.scene.add(mesh2);//网格模型添加到场景中
         }
         // 绘制测试
-        tdm.drawTest = function (x, y, z) {
+        tdm.drawPLS = function (x, y, z) {
             const MIN = 0;
             const MAX = 8;
             const Face4Duration = (MAX - MIN) / 40;
             const PointDuration = (MAX - MIN) / 20;
             const PointColor = '#333';
-
-            // 绘制面
-            for (let x = MIN; x < MAX; x = x + PointDuration) {
-                // 再遍历 y 0~MAX，间隔 duration
-                for (let y = MIN; y < MAX; y = y + PointDuration) {
-                    this.drawFace4(x, y, PointDuration, this.getZ)
-                }
-            }
 
             // 绘制面上的点
             for (let x = MIN; x < MAX; x = x + PointDuration) {
@@ -145,6 +138,13 @@
                     if (y < MAX) {
                         this._drawLine([x, y, this.getZ(x, y)], [x, y + PointDuration, this.getZ(x, y + PointDuration)])
                     }
+                }
+            }
+            // 绘制面
+            for (let x = MIN; x < MAX; x = x + PointDuration) {
+                // 再遍历 y 0~MAX，间隔 duration
+                for (let y = MIN; y < MAX; y = y + PointDuration) {
+                    this.drawSurface(x, y, PointDuration, this.getZ)
                 }
             }
         }
@@ -172,11 +172,11 @@
         light2.shadow.camera.zoom = 10; // tighter shadow map
         tdm.scene.add(light2);
 
-        tdm.drawTest();
+        tdm.drawPLS();
         tdm.init();
     }
 
-    test();
+    drawAxis();
 </script>
 </body>
 </html>
