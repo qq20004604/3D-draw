@@ -18,6 +18,7 @@ class ThreeDManager {
         }
         // 数字的最大的值
         this.MAX_NUMBER = 1;
+        this.MIN_NUMBER = 0;
         // 点的数组
         this.points = [];
         this._createScene();
@@ -49,6 +50,8 @@ class ThreeDManager {
 
     // 清空场景（所有绘制的元素都被清除）
     _clearScene() {
+        this.MAX_NUMBER = 1;
+        this.MIN_NUMBER = 0;
         while (this.scene.children.length > 0) {
             this.scene.remove(this.scene.children[0]);
         }
@@ -56,7 +59,8 @@ class ThreeDManager {
 
     // 创造相机
     _createCamera() {
-        const MAX_NUMBER = this.MAX_NUMBER;
+        console.log(this.MAX_NUMBER, this.MIN_NUMBER)
+        const MAX_NUMBER = this.MAX_NUMBER - this.MIN_NUMBER;
         const proportion = this.size.width / this.size.height;
         let w = null;
         let h = null;
@@ -146,61 +150,98 @@ class ThreeDManager {
     // 创建 x、y、z 坐标轴
     _createGeometry() {
         const MAX_NUMBER = this.MAX_NUMBER;
+        const MIN_NUMBER = this.MIN_NUMBER;
+        const LineLength = MAX_NUMBER - MIN_NUMBER
         // 渲染 x/z 轴面
         // 创建geometry
         const geometryXY1 = new THREE.Geometry();
         // 添加顶点
-        geometryXY1.vertices.push(new THREE.Vector3(0, 0, 0));
+        geometryXY1.vertices.push(new THREE.Vector3(MIN_NUMBER, 0, 0));
         geometryXY1.vertices.push(new THREE.Vector3(MAX_NUMBER, 0, 0));
 
         const geometryXY2 = new THREE.Geometry();
-        geometryXY2.vertices.push(new THREE.Vector3(0, 0, 0));
+        geometryXY2.vertices.push(new THREE.Vector3(MIN_NUMBER, 0, 0));
         geometryXY2.vertices.push(new THREE.Vector3(MAX_NUMBER, 0, 0));
 
         for (let i = 0; i <= 10; i++) {
-            const line1 = new THREE.Line(geometryXY1, new THREE.LineBasicMaterial({color: i === 0 ? '#000' : "#ccc"}));     //利用geometry和material创建line
-            line1.position.z = i * MAX_NUMBER / 10;   //设置line的位置（即z轴的坐标）
+            // let isZero = parseInt() === 0;
+            let n = MIN_NUMBER + i * LineLength / 10;
+            let isZero = n < Number.EPSILON && n > Number.EPSILON * -1;
+
+            const line1 = new THREE.Line(geometryXY1, new THREE.LineBasicMaterial({color: isZero ? '#000' : "#ccc"}));     //利用geometry和material创建line
+
+            if (isZero) {
+                line1.position.z = 0;
+            } else {
+                line1.position.z = MIN_NUMBER + i * LineLength / 10;   //设置line的位置（即z轴的坐标）
+            }
             this.scene.add(line1);    //将line添加到场景中
 
-            const line11 = new THREE.Line(geometryXY2, new THREE.LineBasicMaterial({color: i === 0 ? '#000' : "#ccc"}));
-            line11.position.x = i * MAX_NUMBER / 10;
+            const line11 = new THREE.Line(geometryXY2, new THREE.LineBasicMaterial({color: isZero ? '#000' : "#ccc"}));
+            if (isZero) {
+                line11.position.x = 0;
+            } else {
+                line11.position.x = MIN_NUMBER + i * LineLength / 10;
+            }
             line11.rotation.y = -Math.PI / 2;    //绕y轴旋转90度
             this.scene.add(line11);
         }
 
         // 渲染 Y/Z 面
         const geometryYZ1 = new THREE.Geometry();    //创建geometry
-        geometryYZ1.vertices.push(new THREE.Vector3(0, 0, 0));  //添加顶点
+        geometryYZ1.vertices.push(new THREE.Vector3(0, 0, MIN_NUMBER));  //添加顶点
         geometryYZ1.vertices.push(new THREE.Vector3(0, 0, MAX_NUMBER));
         const geometryYZ2 = new THREE.Geometry();    //创建geometry
-        geometryYZ2.vertices.push(new THREE.Vector3(0, 0, 0));  //添加顶点
+        geometryYZ2.vertices.push(new THREE.Vector3(0, 0, MIN_NUMBER));  //添加顶点
         geometryYZ2.vertices.push(new THREE.Vector3(0, 0, MAX_NUMBER));
         for (let i = 0; i <= 10; i++) {
-            //var mesh = new THREE.Mesh(geometry, material);
-            const line2 = new THREE.Line(geometryYZ1, new THREE.LineBasicMaterial({color: i === 0 ? '#000' : "#ccc"}));     //利用geometry和material创建line
-            line2.position.y = i * MAX_NUMBER / 10;   //设置line的位置
+            // let isZero = parseInt(MIN_NUMBER + i * LineLength / 10) === 0;
+            let n = MIN_NUMBER + i * LineLength / 10;
+            // 是否是0值坐标轴线
+            let isZero = n < Number.EPSILON && n > Number.EPSILON * -1;
+            const line2 = new THREE.Line(geometryYZ1, new THREE.LineBasicMaterial({color: isZero ? '#000' : "#ccc"}));     //利用geometry和material创建line
+            if (isZero) {
+                line2.position.y = 0
+            } else {
+                line2.position.y = MIN_NUMBER + i * LineLength / 10;   //设置line的位置
+            }
             this.scene.add(line2);    //将line添加到场景中
 
-            const line22 = new THREE.Line(geometryYZ2, new THREE.LineBasicMaterial({color: i === 0 ? '#000' : "#ccc"}));
-            line22.position.z = i * MAX_NUMBER / 10;
+            const line22 = new THREE.Line(geometryYZ2, new THREE.LineBasicMaterial({color: isZero ? '#000' : "#ccc"}));
+            if (isZero) {
+                line22.position.z = 0
+            } else {
+                line22.position.z = MIN_NUMBER + i * LineLength / 10;
+            }
             line22.rotation.x = -Math.PI / 2;    //绕y轴旋转90度
             this.scene.add(line22);
         }
 
         // 渲染 X/Z 面
         const geometryXZ1 = new THREE.Geometry();    //创建geometry
-        geometryXZ1.vertices.push(new THREE.Vector3(0, 0, 0));  //添加顶点
+        geometryXZ1.vertices.push(new THREE.Vector3(MIN_NUMBER, 0, 0));  //添加顶点
         geometryXZ1.vertices.push(new THREE.Vector3(MAX_NUMBER, 0, 0));
         const geometryXZ2 = new THREE.Geometry();    //创建geometry
-        geometryXZ2.vertices.push(new THREE.Vector3(0, 0, 0));  //添加顶点
+        geometryXZ2.vertices.push(new THREE.Vector3(MIN_NUMBER, 0, 0));  //添加顶点
         geometryXZ2.vertices.push(new THREE.Vector3(MAX_NUMBER, 0, 0));
         for (let i = 0; i <= 10; i++) {
-            const line3 = new THREE.Line(geometryXZ1, new THREE.LineBasicMaterial({color: i === 0 ? '#000' : "#ccc"}));     //利用geometry和material创建line
-            line3.position.y = i * MAX_NUMBER / 10;   //设置line的位置
+            // let isZero = parseInt(MIN_NUMBER + i * LineLength / 10) === 0;
+            let n = MIN_NUMBER + i * LineLength / 10;
+            let isZero = n < Number.EPSILON && n > Number.EPSILON * -1;
+            const line3 = new THREE.Line(geometryXZ1, new THREE.LineBasicMaterial({color: isZero ? '#000' : "#ccc"}));     //利用geometry和material创建line
+            if (isZero) {
+                line3.position.y = 0
+            } else {
+                line3.position.y = MIN_NUMBER + i * LineLength / 10;   //设置line的位置
+            }
             this.scene.add(line3);    //将line添加到场景中
 
-            const line33 = new THREE.Line(geometryXZ2, new THREE.LineBasicMaterial({color: i === 0 ? '#000' : "#ccc"}));
-            line33.position.x = i * MAX_NUMBER / 10;
+            const line33 = new THREE.Line(geometryXZ2, new THREE.LineBasicMaterial({color: isZero ? '#000' : "#ccc"}));
+            if (isZero) {
+                line33.position.x = 0
+            } else {
+                line33.position.x = MIN_NUMBER + i * LineLength / 10;
+            }
             line33.rotation.z = Math.PI / 2;    //绕y轴旋转90度
             this.scene.add(line33);
         }
@@ -209,6 +250,8 @@ class ThreeDManager {
     // 绘制 x、y、z 坐标轴的文字
     _createXYZText() {
         const MAX_NUMBER = this.MAX_NUMBER;
+        const MIN_NUMBER = this.MIN_NUMBER;
+        const LineLength = MAX_NUMBER - MIN_NUMBER
 
         const textLoader = new THREE.FontLoader();
         const that = this;
@@ -217,7 +260,7 @@ class ThreeDManager {
             function (font) {
                 // left top text
                 const options = {
-                    size: MAX_NUMBER * 0.03,
+                    size: LineLength * 0.03,
                     height: 0,  // 厚度
                     font, // “引用js字体必须换成英文”
                     bevelThickness: 1,  // 文字斜角的深度。默认值是10。
@@ -269,31 +312,31 @@ class ThreeDManager {
 
                 // 画六个方向的坐标轴文字
                 createText({
-                    n: MAX_NUMBER / 10,
+                    n: LineLength / 10,
                     text: function (i) {
-                        if (i === 0) {
+                        if (MIN_NUMBER + i * LineLength / 10 < Number.EPSILON && MIN_NUMBER + i * LineLength / 10 > Number.EPSILON * -1) {
                             return ''
                         } else {
-                            return i * MAX_NUMBER / 10
+                            return MIN_NUMBER + i * LineLength / 10
                         }
                     },
                     x: 0,
                     y: MAX_NUMBER,
                     z: function (i) {
-                        return MAX_NUMBER / 10 * i
+                        return MIN_NUMBER + i * LineLength / 10
                     }
                 }, undefined, 'yz-z');  // xz 面和 z 轴平行的数字，下同
                 createText({
                     text: function (i) {
-                        if (i === 0) {
+                        if (MIN_NUMBER + i * LineLength / 10 < Number.EPSILON && MIN_NUMBER + i * LineLength / 10 > Number.EPSILON * -1) {
                             return 'Z'
                         } else {
-                            return i * MAX_NUMBER / 10
+                            return MIN_NUMBER + i * LineLength / 10
                         }
                     },
                     n: MAX_NUMBER / 10,
                     x: function (i) {
-                        return i * MAX_NUMBER / 10
+                        return MIN_NUMBER + i * LineLength / 10
                     },
                     y: 0,
                     z: MAX_NUMBER
@@ -302,61 +345,61 @@ class ThreeDManager {
                 createText({
                     n: MAX_NUMBER / 10,
                     text: function (i) {
-                        if (i === 0) {
+                        if (MIN_NUMBER + i * LineLength / 10 < Number.EPSILON && MIN_NUMBER + i * LineLength / 10 > Number.EPSILON * -1) {
                             return 'Y'
                         } else {
-                            return i * MAX_NUMBER / 10
+                            return MIN_NUMBER + i * LineLength / 10
                         }
                     },
                     x: function (i) {
-                        return i * MAX_NUMBER / 10
+                        return MIN_NUMBER + i * LineLength / 10
                     },
                     y: MAX_NUMBER,
                     z: 0
                 }, undefined, 'xy-x');
                 createText({
                     text: function (i) {
-                        if (i === 0) {
+                        if (MIN_NUMBER + i * LineLength / 10 < Number.EPSILON && MIN_NUMBER + i * LineLength / 10 > Number.EPSILON * -1) {
                             return ''
                         } else {
-                            return i * MAX_NUMBER / 10
+                            return MIN_NUMBER + i * LineLength / 10
                         }
                     },
                     n: MAX_NUMBER / 10,
                     x: MAX_NUMBER,
                     y: 0,
                     z: function (i) {
-                        return i * MAX_NUMBER / 10
+                        return MIN_NUMBER + i * LineLength / 10
                     }
                 }, undefined, 'xz-z');
                 createText({
                     text: function (i) {
-                        if (i === 0) {
+                        if (MIN_NUMBER + i * LineLength / 10 < Number.EPSILON && MIN_NUMBER + i * LineLength / 10 > Number.EPSILON * -1) {
                             return 'X'
                         } else {
-                            return i * MAX_NUMBER / 10
+                            return MIN_NUMBER + i * LineLength / 10
                         }
                     },
                     n: MAX_NUMBER / 10,
                     x: MAX_NUMBER,
                     y: function (i) {
-                        return i * MAX_NUMBER / 10
+                        return MIN_NUMBER + i * LineLength / 10
                     },
                     z: 0
                 }, undefined, 'xy-y');
                 createText({
                     text: function (i) {
-                        if (i === 0) {
+                        if (MIN_NUMBER + i * LineLength / 10 < Number.EPSILON && MIN_NUMBER + i * LineLength / 10 > Number.EPSILON * -1) {
                             return ''
                         } else {
-                            return i * MAX_NUMBER / 10
+                            return MIN_NUMBER + i * LineLength / 10
                         }
                     },
                     n: MAX_NUMBER / 10,
                     x: 0,
                     z: MAX_NUMBER,
                     y: function (i) {
-                        return i * MAX_NUMBER / 10
+                        return MIN_NUMBER + i * LineLength / 10
                     }
                 }, undefined, 'yz-y');
             }
@@ -376,23 +419,32 @@ class ThreeDManager {
     }
 
     // 获取点的最大值。
-    // 1、遍历所有点的所有坐标，求最大的那个值。
-    // 2、直接传递最大值
-    setPointsMax(pointsOrMax) {
-        let max;
-        // 如果传的是数字，那么认为是最大值，那么直接使用最大值
-        if (typeof pointsOrMax === 'number') {
-            this.MAX_NUMBER = pointsOrMax;
+    // 如果第一个参数不传，则忽略第二个参数，使用默认最大最小值
+    // 如果第一个参数传的是数组，则忽略第二个参数，通过数组计算最大最小值
+    // 如果第一个参数传的是数字，则认为第二个参数传的也是数字，使用第一个作为最小值，第二个作为最大值
+    setPointsMax(pointsOrMin, Max) {
+        let max, min;
+        // 如果第一个参数不传，则忽略第二个参数，使用默认最大最小值
+        // 如果第一个参数传的是数组，则忽略第二个参数。
+        // 如果第一个参数传的是数字，则认为第二个参数传的也是数字
+        if (typeof pointsOrMin === 'number') {
+            this.MIN_NUMBER = pointsOrMin;
+            this.MAX_NUMBER = Max;
             return;
-        } else if (pointsOrMax.length === 0) {
+        } else if (!pointsOrMin) {
+            this.MIN_NUMBER = -1;
             this.MAX_NUMBER = 1;
             return;
         }
-        max = pointsOrMax[0][0];
-        pointsOrMax.forEach(point => {
+        max = pointsOrMin[0][0];
+        min = pointsOrMin[0][0];
+        pointsOrMin.forEach(point => {
             point.forEach(xyz => {
                 if (xyz > max) {
                     max = xyz;
+                }
+                if (xyz < min) {
+                    min = xyz;
                 }
             })
         })
@@ -400,8 +452,9 @@ class ThreeDManager {
         // 为了简化，方法是以 10 次方为单位，判断小数点0前后的位数
         const StrMax = String(max);
         const StrMaxArr = StrMax.split('.');
-        // 先判断小数点前是否大于1位
-        if (StrMaxArr[0].length > 1) {
+        const isMaxMinus = StrMaxArr[0].indexOf('-') > -1
+        // 先判断小数点前是否大于1位（同时，删除负号）
+        if ((isMaxMinus && StrMaxArr[0].length > 2) || (!isMaxMinus && StrMaxArr[0].length > 1)) {
             max = Math.pow(10, StrMaxArr[0].length + 1);
         } else if (StrMaxArr[0] !== '0') {
             // 如果只有一位，那么判断一下是否是0，如果不是0，则max 取10
@@ -417,8 +470,42 @@ class ThreeDManager {
                 }
             }
         }
+        max *= isMaxMinus ? -1 : 1
 
+        // 特殊处理一下 max
+        if (max <= 0 && max > -1) {
+            max = 0;
+        }
         this.MAX_NUMBER = max;
+
+        const StrMin = String(min);
+        const StrMinArr = StrMin.split('.');
+        // 是否是负数
+        const isMinMinus = StrMinArr[0].indexOf('-') > -1
+        // 先判断小数点前是否大于1位
+        if ((isMinMinus && StrMinArr[0].length > 2) || (!isMinMinus && StrMinArr[0].length > 1)) {
+            min = Math.pow(10, StrMinArr[0].length + 1);
+        } else if (StrMinArr[0] !== '0') {
+            // 如果只有一位，那么判断一下是否是0，如果不是0，则 min 取10
+            min = -10;
+        } else {
+            // 如果小数点前只有一位且是0，则判断小数点后，第几位开始不是0
+            for (let j = 0; j < StrMinArr[1].length; j++) {
+                // 如果某一位不等于0。比如0.0123的第一位不是0（此时j=1），那么坐标轴最大值应该取0.1（即10的-1次方）
+                // 如果是 0.123，则 j = 0，取 1， 10 的 0 次方
+                if (StrMinArr[1][j] !== '0') {
+                    min = Math.pow(10, j * -1);
+                    break;
+                }
+            }
+        }
+        min *= isMinMinus ? -1 : 1;
+        // 特殊处理一下 min
+        if (min < 1 && min >= 0) {
+            min = 0;
+        }
+
+        this.MIN_NUMBER = min;
     }
 
     // 画一个点

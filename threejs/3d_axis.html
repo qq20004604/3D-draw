@@ -27,9 +27,11 @@
     <button onclick="clearCanvas()">清空画布</button>
     <button onclick="drawAxis()">画坐标轴</button>
     <button onclick="drawPoints()">画坐标轴 + 画点（随机生成100个点）</button>
-    <button onclick="drawFormula()">画一个数学公式的面【z = (3 * x + 4 * x * y) / 30】</button>
+    <button onclick="drawFormula()">画一个数学公式的面【a * x * Math.exp(-1 * (x * x + y * y))】</button>
+    a：<input type="text" id="a" value="25">
 </p>
-<p>Github地址：<a target="_blank" href="https://github.com/qq20004604/3D-draw">https://github.com/qq20004604/3D-draw</a></p>
+<p>Github地址：<a target="_blank" href="https://github.com/qq20004604/3D-draw">https://github.com/qq20004604/3D-draw</a>
+</p>
 <script>
     // 生成三维随机数。参数1是最大值（0~最大值），参数2是生成数字的数量
     function make3DRandomNumberList(max, count, fixed = 2) {
@@ -72,10 +74,12 @@
 
     function drawFormula() {
         tdm._clearScene();
-        tdm.setPointsMax(10);
+        tdm.setPointsMax(-10, 10);
         // 绘制一个正方形
         tdm.drawSurface = function (x, y, duration, fn) {
             const FaceColor = '#a00';
+            const OverZeroColor = '#0f0';
+            const BelowZeroColor = '#00f';
 
             let geometry = new THREE.Geometry(); // 声明一个空几何体对象
             let z = fn(x, y)
@@ -90,8 +94,15 @@
             geometry.vertices.push(p1, p2, p3); // 顶点坐标添加到geometry对象
             let face = new THREE.Face3(0, 1, 2); // 创建三角面
             geometry.faces.push(face); //三角面添加到几何体
+            let color = FaceColor;
+            if (z > 0.1) {
+                color = OverZeroColor;
+            } else if (z < -0.1) {
+                color = BelowZeroColor;
+            }
+
             let material = new THREE.MeshBasicMaterial({
-                color: FaceColor,//三角面颜色
+                color: color,//三角面颜色
                 side: THREE.DoubleSide //两面可见
             });//材质对象
 
@@ -106,7 +117,7 @@
             let face2 = new THREE.Face3(0, 1, 2); // 创建三角面
             geometry2.faces.push(face2); //三角面添加到几何体
             let material2 = new THREE.MeshBasicMaterial({
-                color: FaceColor,//三角面颜色
+                color: color,//三角面颜色
                 side: THREE.DoubleSide //两面可见
             });//材质对象
             let mesh2 = new THREE.Mesh(geometry2, material2);//网格模型对象
@@ -116,10 +127,10 @@
         }
         // 绘制测试
         tdm.drawPLS = function (x, y, z) {
-            const MIN = 0;
-            const MAX = 8;
+            const MIN = -10;
+            const MAX = 10;
             const Face4Duration = (MAX - MIN) / 40;
-            const PointDuration = (MAX - MIN) / 20;
+            const PointDuration = (MAX - MIN) / 40;
             const PointColor = '#333';
 
             // 绘制面上的点
@@ -151,26 +162,28 @@
         tdm.getZ = function (x, y) {
             // let z = x * x - y * y;
             // let z = Math.cos(x) * Math.cos(y) + 5;
-            const z = (3 * x + 4 * x * y) / 30
+            // const z = (3 * x + 4 * x * y) / 30
+            const a = document.querySelector("#a").value;
+            const z = a * x * Math.exp(-1 * (x * x + y * y));
             return z;
         }
 
-        var light = new THREE.DirectionalLight();
-        light.position.set(20, 20, 0);
-        light.castShadow = true;
-        light.shadow.camera.zoom = 10; // tighter shadow map
-        tdm.scene.add(new THREE.AmbientLight(0x222244));
+        // var light = new THREE.DirectionalLight();
+        // light.position.set(20, 20, 0);
+        // light.castShadow = true;
+        // light.shadow.camera.zoom = 10; // tighter shadow map
+        // tdm.scene.add(new THREE.AmbientLight(0x222244));
 
-        var light = new THREE.DirectionalLight('#f00');
-        light.position.set(0, 0, 10);
-        light.castShadow = false;
-        light.shadow.camera.zoom = 10; // tighter shadow map
-        tdm.scene.add(light);
-        var light2 = new THREE.DirectionalLight('#0f0');
-        light2.position.set(10, 0, 0);
-        light2.castShadow = false;
-        light2.shadow.camera.zoom = 10; // tighter shadow map
-        tdm.scene.add(light2);
+        // var light = new THREE.DirectionalLight('#f00');
+        // light.position.set(0, 0, 10);
+        // light.castShadow = false;
+        // light.shadow.camera.zoom = 10; // tighter shadow map
+        // tdm.scene.add(light);
+        // var light2 = new THREE.DirectionalLight('#0f0');
+        // light2.position.set(10, 0, 0);
+        // light2.castShadow = false;
+        // light2.shadow.camera.zoom = 10; // tighter shadow map
+        // tdm.scene.add(light2);
 
         tdm.drawPLS();
         tdm.init();
